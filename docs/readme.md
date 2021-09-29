@@ -28,7 +28,12 @@ All proposals are subject to a 10 day voting period, and any address with voting
 
 ## Proposals
 
-Proposals are executable code as a funds transfer to the receiver account.
+Proposals are executable code as a funds transfer to the receiver account.  
+
+
+### notes :
+- avoid need for a database 
+- auto generate names for proposals
 
 ### Proposal Fields
 
@@ -52,10 +57,13 @@ Proposals are executable code as a funds transfer to the receiver account.
 
 In order to prevent spam and ensure only serious proposals make it to this stage. a registration fee of **50,000** sats must be paid for any proposal to be created. The funds obtained from proposal costs will be deposited to the `funding` account where funds will be distributed from for all proposals.
 
-A transfer needs to include the proposal name in the memo fiel for the system to pick up the payment and set a proposal from draft to active.
+A transfer needs to include the proposal name in the memo field for the system to pick up the payment and set a proposal from draft to active.
+
+### notes :
 
 - This would be done with smart contract notify?
-- How would we handle transfers with invalid memo fields? reject transfers similar to evodex
+- How would we handle transfers with invalid memo fields? reject transfers similar to evodex.
+- Consolidate draft and payment actions in order to simplify user experience.
 
 ## Voting
 
@@ -67,7 +75,7 @@ All proposals are subject to a 10 day voting period, and any address with voting
 
 ### Voting Threshold
 
-10% of the circulating supply must vote in order for a proposal to be eligible for acceptance. If more than 50% of token
+10% of the circulating supply must vote in order for a proposal to be eligible for acceptance. If more than 50% of token s vote in favor the proposal succeeds.
 
 ## Proposal Approval
 
