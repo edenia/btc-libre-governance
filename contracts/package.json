@@ -1,0 +1,20 @@
+{
+  "name": "testcontracts",
+  "version": "1.0.0",
+  "description": "Test your project contracts",
+  "main": "index.js",
+  "scripts": {
+    "test": "nodemon --exec 'mocha ./tests/*.js'"
+  },
+  "devDependencies": {
+    "mocha": "^6.2.0",
+    "nodemon": "^2.0.13"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "eos-ecc": "0.0.1-rc",
+    "eosjs": "^22.0.0",
+    "eoslime": "^2.0.0"
+  }
+}
