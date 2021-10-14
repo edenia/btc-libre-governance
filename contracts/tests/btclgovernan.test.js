@@ -51,7 +51,22 @@ describe('btclgovernan contract', function () {
     await btclgovernanDeploy()
   })
 
-  it('Should be same account name', () => {
-    assert.strictEqual(btclgovernanAccount.name, btclgovernanContract.name)
+  it('Should set params', async () => {
+    const voteThreshold = 1
+    const fundingAccount = btclgovernanAccount.name
+    const votingDays = 1
+    const proposalCost = '1.0000 XPR'
+    const approver = btclgovernanAccount.name
+    const response = await btclgovernanContract.actions.setparams.broadcast([
+      voteThreshold,
+      fundingAccount,
+      votingDays,
+      proposalCost,
+      approver
+    ])
+    const rows = await btclgovernanContract.tables.params.limit(1).find()
+
+    assert.strictEqual(rows[0].approver, btclgovernanAccount.name)
+    console.log(`done setparams txid ${response.transaction_id}`)
   })
 })

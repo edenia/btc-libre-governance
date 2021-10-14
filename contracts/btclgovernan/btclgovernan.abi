@@ -7,6 +7,58 @@
             "name": "clear",
             "base": "",
             "fields": []
+        },
+        {
+            "name": "params",
+            "base": "",
+            "fields": [
+                {
+                    "name": "vote_threshold",
+                    "type": "uint8"
+                },
+                {
+                    "name": "funding_account",
+                    "type": "name"
+                },
+                {
+                    "name": "voting_days",
+                    "type": "uint8"
+                },
+                {
+                    "name": "proposal_cost",
+                    "type": "asset"
+                },
+                {
+                    "name": "approver",
+                    "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "setparams",
+            "base": "",
+            "fields": [
+                {
+                    "name": "vote_threshold",
+                    "type": "uint8"
+                },
+                {
+                    "name": "funding_account",
+                    "type": "name"
+                },
+                {
+                    "name": "voting_days",
+                    "type": "uint8"
+                },
+                {
+                    "name": "proposal_cost",
+                    "type": "asset"
+                },
+                {
+                    "name": "approver",
+                    "type": "name"
+                }
+            ]
         }
     ],
     "actions": [
@@ -14,9 +66,22 @@
             "name": "clear",
             "type": "clear",
             "ricardian_contract": ""
+        },
+        {
+            "name": "setparams",
+            "type": "setparams",
+            "ricardian_contract": ""
         }
     ],
-    "tables": [],
+    "tables": [
+        {
+            "name": "params",
+            "type": "params",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        }
+    ],
     "kv_tables": {},
     "ricardian_clauses": [],
     "variants": [],
