@@ -4,7 +4,14 @@
   "description": "Test your project contracts",
   "main": "index.js",
   "scripts": {
-    "test": "nodemon --exec 'mocha ./tests/*.js'"
+    "test": "nodemon --exec 'cd ../ && make build-contracts && cd ./contracts && mocha ./tests/*.js'"
+  },
+  "nodemonConfig": {
+    "ignore": [
+      "./node_modules",
+      "./**/build/"
+    ],
+    "ext": "js,json,md,cpp,hpp,txt"
   },
   "devDependencies": {
     "mocha": "^6.2.0",
