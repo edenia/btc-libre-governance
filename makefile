@@ -66,7 +66,9 @@ testnet:
 	@echo "$(BLUE)testnet |$(RESET) done"
 
 build-contracts:
-	@cd contracts/btclgovernan && eosio-cpp -w -I include -o btclgovernan.wasm src/btclgovernan.cpp
+	@mkdir -p contracts/btclgovernan/build
+	@rm -rf contracts/btclgovernan/build/*
+	@cd contracts/btclgovernan/build && cmake .. && make
 
 deploy-contracts:
 	$(eval -include .env)
@@ -82,7 +84,6 @@ deploy-contracts:
 test-contracts:
 	$(eval -include .env)
 	make -B testnet
-	make -B build-contracts
 	@until \
 		cleos get account eosio.token > /dev/null 2>&1; \
 		do echo "$(BLUE)run-contracts-tests |$(RESET) waiting for testnet service"; \

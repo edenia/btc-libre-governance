@@ -241,12 +241,39 @@ const create = async (name, privateKey, accountCreator) => {
   }
 
   await createAccountOnBlockchain(newAccount, accountCreator)
+  await new Promise(resolve => setTimeout(() => resolve(), 500))
 
   return eoslime.Account.load(newAccount.name, newAccount.privateKey)
 }
 
+const load = async (name, privateKey, accountCreator) => {
+  let account
+
+  try {
+    account = await create(name, privateKey, accountCreator)
+  } catch (error) {
+    account = eoslime.Account.load(name, privateKey)
+  }
+
+  let contract
+
+  try {
+    contract = await deployOnAccount(
+      `./${name}/build/${name}/${name}.wasm`,
+      `./${name}/build/${name}/${name}.abi`,
+      account,
+      { inline: true }
+    )
+  } catch (error) {
+    contract = await fromAccount(account)
+  }
+
+  return { account, contract }
+}
+
 const eoslimeInit = () => ({
   ...eoslime,
+  load,
   Contract: {
     ...eoslime.Contract,
     deployOnAccount,
