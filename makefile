@@ -74,7 +74,7 @@ deploy-contracts:
 	$(eval -include .env)
 	@mkdir -p tmp/contracts
 	@cleos wallet unlock --name $(CONTRACTS_BTCLGOVERNAN_ACCOUNT) --password $(CONTRACTS_BTCLGOVERNAN_PASSWORD) || echo ""
-	@cleos -u $(CONTRACTS_CHAIN_ENDPOINT) set contract $(CONTRACTS_BTCLGOVERNAN_ACCOUNT) ./contracts/btclgovernan || echo ""
+	@cleos -u $(CONTRACTS_CHAIN_ENDPOINT) set contract $(CONTRACTS_BTCLGOVERNAN_ACCOUNT) ./contracts/btclgovernan/build/btclgovernan || echo ""
 	@cat "contracts/btclgovernan/permission.json" | sed -e 's/<CONTRACT_ACCOUNT>/${CONTRACTS_BTCLGOVERNAN_ACCOUNT}/g' > "tmp/contracts/btclgovernan_permission_temp.json"
 	@cat "tmp/contracts/btclgovernan_permission_temp.json" | sed -e 's/<CONTRACT_PUBLIC_KEY>/${CONTRACTS_BTCLGOVERNAN_PUBLIC_KEY}/g' > "tmp/contracts/btclgovernan_permission.json"
 	@cleos -u $(CONTRACTS_CHAIN_ENDPOINT) set account permission $(CONTRACTS_BTCLGOVERNAN_ACCOUNT) active tmp/contracts/btclgovernan_permission.json owner -p $(CONTRACTS_BTCLGOVERNAN_ACCOUNT)

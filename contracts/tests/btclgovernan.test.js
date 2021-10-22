@@ -9,6 +9,14 @@ const utils = require('./utils')
 
 const EOSIO_TOKEN_CONTRACT = 'eosio.token'
 const SUPPORTED_TOKEN = 'XPR'
+const PROPOSAL_STATUS = {
+  DRAFT: 1,
+  ACTIVE: 2,
+  SUCCEEDED: 3,
+  DEFEATED: 4,
+  CANCELED: 5,
+  COMPLETED: 6
+}
 
 let eoslime
 let eosioAccount
@@ -42,7 +50,7 @@ describe('btclgovernan contract', function () {
     const minimumBalanceToCreateProposals = `1000.0000 ${SUPPORTED_TOKEN}`
     const proposalCost = `1.0000 ${SUPPORTED_TOKEN}`
     const approver = btclgovernan.account.name
-    const response = await btclgovernan.contract.actions.setparams.broadcast([
+    await btclgovernan.contract.actions.setparams.broadcast([
       fundingAccount,
       voteThreshold,
       votingDays,
@@ -53,10 +61,9 @@ describe('btclgovernan contract', function () {
     const rows = await btclgovernan.contract.tables.params.limit(1).find()
 
     assert.strictEqual(rows[0].approver, btclgovernan.account.name)
-    console.log(`    👍 setparams txid ${response.transaction_id}`)
   })
 
-  it('should return error on invalid token code', async () => {
+  it('should return an error when symbol is invalid ', async () => {
     const fundingAccount = btclgovernan.account.name
     const voteThreshold = 10
     const votingDays = 1
@@ -76,14 +83,14 @@ describe('btclgovernan contract', function () {
     } catch (error) {
       assert.strictEqual(
         error.message,
-        'assertion failure with message: invalid token code'
+        'assertion failure with message: invalid minimum_balance_to_create_proposals symbol'
       )
     }
   })
 
   it('should create a proposal', async () => {
     const creator = await eoslime.Account.createRandom(eosioAccount)
-    const transferTx = await eosioToken.contract.actions.transfer.broadcast(
+    await eosioToken.contract.actions.transfer.broadcast(
       [
         eosioAccount.name,
         creator.name,
@@ -94,22 +101,20 @@ describe('btclgovernan contract', function () {
     )
     const receiver = await eoslime.Account.createRandom(eosioAccount)
     const name = await eoslime.utils.randomName()
-    const title = 'the best proposal'
+    const title = 'proposal to test create action'
     const detail = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.'
     const amount = `50000.0000 ${SUPPORTED_TOKEN}`
     const url = 'http://localhost:3000/'
-    const createTx = await btclgovernan.contract.actions.create.broadcast(
+    await btclgovernan.contract.actions.create.broadcast(
       [creator.name, receiver.name, name, title, detail, amount, url],
       creator
     )
     const rows = await btclgovernan.contract.tables.proposals.equal(name).find()
 
     assert.strictEqual(rows[0].name, name)
-    console.log(`    👍 transfer txid ${transferTx.transaction_id}`)
-    console.log(`    👍 create txid ${createTx.transaction_id}`)
   })
 
-  it('should return error on create proposal without balance', async () => {
+  it('should return an error on create proposal without enought balance', async () => {
     try {
       const creator = await eoslime.Account.createRandom(eosioAccount)
       const receiver = await eoslime.Account.createRandom(eosioAccount)
@@ -128,5 +133,122 @@ describe('btclgovernan contract', function () {
         'assertion failure with message: not enough balance'
       )
     }
+  })
+
+  it('should return an error when proposal is invalid', async () => {
+    try {
+      await eosioToken.contract.actions.transfer.broadcast(
+        [
+          eosioAccount.name,
+          btclgovernan.account.name,
+          `1000.0000 ${SUPPORTED_TOKEN}`,
+          'payment:aaaabbbbcccc'
+        ],
+        eosioAccount
+      )
+    } catch (error) {
+      assert.strictEqual(
+        error.message,
+        'assertion failure with message: proposal not found'
+      )
+    }
+  })
+
+  it('should return an error when memo is invalid', async () => {
+    try {
+      await eosioToken.contract.actions.transfer.broadcast(
+        [
+          eosioAccount.name,
+          btclgovernan.account.name,
+          `1000.0000 ${SUPPORTED_TOKEN}`,
+          'spam transfer'
+        ],
+        eosioAccount
+      )
+    } catch (error) {
+      assert.strictEqual(
+        error.message,
+        'assertion failure with message: invalid memo'
+      )
+    }
+  })
+
+  it('should return an error when quantity is invalid', async () => {
+    try {
+      const creator = await eoslime.Account.createRandom(eosioAccount)
+      await eosioToken.contract.actions.transfer.broadcast(
+        [
+          eosioAccount.name,
+          creator.name,
+          `1000.0000 ${SUPPORTED_TOKEN}`,
+          'transfer'
+        ],
+        eosioAccount
+      )
+      const receiver = await eoslime.Account.createRandom(eosioAccount)
+      const name = await eoslime.utils.randomName()
+      const title = 'proposal to test payment with invalid quantity'
+      const detail = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.'
+      const amount = `50000.0000 ${SUPPORTED_TOKEN}`
+      const url = 'http://localhost:3000/'
+
+      await btclgovernan.contract.actions.create.broadcast(
+        [creator.name, receiver.name, name, title, detail, amount, url],
+        creator
+      )
+      await new Promise(resolve => setTimeout(() => resolve(), 1000))
+      await eosioToken.contract.actions.transfer.broadcast(
+        [
+          eosioAccount.name,
+          btclgovernan.account.name,
+          `1000.0000 ${SUPPORTED_TOKEN}`,
+          `payment:${name}`
+        ],
+        eosioAccount
+      )
+    } catch (error) {
+      assert.strictEqual(
+        error.message,
+        'assertion failure with message: invalid quantity amount'
+      )
+    }
+  })
+
+  it('should change the proposal to active status', async () => {
+    const creator = await eoslime.Account.createRandom(eosioAccount)
+    await eosioToken.contract.actions.transfer.broadcast(
+      [
+        eosioAccount.name,
+        creator.name,
+        `1000.0000 ${SUPPORTED_TOKEN}`,
+        'transfer'
+      ],
+      eosioAccount
+    )
+    const receiver = await eoslime.Account.createRandom(eosioAccount)
+    const name = await eoslime.utils.randomName()
+    const title = 'proposal to test a valid payment'
+    const detail = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.'
+    const amount = `50000.0000 ${SUPPORTED_TOKEN}`
+    const url = 'http://localhost:3000/'
+
+    await btclgovernan.contract.actions.create.broadcast(
+      [creator.name, receiver.name, name, title, detail, amount, url],
+      creator
+    )
+    await new Promise(resolve => setTimeout(() => resolve(), 1000))
+    await eosioToken.contract.actions.transfer.broadcast(
+      [
+        eosioAccount.name,
+        btclgovernan.account.name,
+        `1.0000 ${SUPPORTED_TOKEN}`,
+        `payment:${name}`
+      ],
+      eosioAccount
+    )
+
+    const rows = await btclgovernan.contract.tables.proposals.equal(name).find()
+
+    assert.strictEqual(rows[0].status, PROPOSAL_STATUS.ACTIVE)
   })
 })
