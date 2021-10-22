@@ -1,5 +1,13 @@
 {
   "editor.tabSize": 2,
   "editor.renderWhitespace": "all",
-  "editor.formatOnSave": true
+  "[javascript]": {
+    "editor.formatOnSave": true
+  },
+  "[json]": {
+    "editor.formatOnSave": true
+  },
+  "[markdown]": {
+    "editor.formatOnSave": true
+  },
 }
