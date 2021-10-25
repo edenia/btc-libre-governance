@@ -66,7 +66,29 @@ public:
     */
    [[eosio::on_notify("*::transfer")]] void ontransfer(name from, name to, asset quantity, string memo);
 
-   bool is_valid_minimum_balance(name account);
+   /**
+    * Vote For
+    *
+    * This action vote for a proposal.
+    *
+    * @param proposal
+    *
+    * @return no return value.
+    */
+   ACTION votefor(name voter, name proposal);
+
+   /**
+    * Vote Against
+    *
+    * This action vote against a proposal.
+    *
+    * @param proposal
+    *
+    * @return no return value.
+    */
+   ACTION voteagainst(name voter, name proposal);
+
+   asset get_account_balance(name account);
 
    void payment_handler(name proposal, asset quantity);
 
@@ -75,7 +97,8 @@ public:
 private:
    string EOSIO_TOKEN_CONTRACT = "eosio.token";
 
-   string SUPPORTED_TOKEN = "XPR";
+   string SUPPORTED_TOKEN_SYMBOL = "XPR";
+   uint8_t SUPPORTED_TOKEN_PRECISION = 4;
 
    string PAYMENT_TRANSFER = "payment:";
    string DONATION_TRANSFER = "donation";
@@ -127,6 +150,16 @@ private:
       indexed_by<name("createdon"), const_mem_fun<proposals, uint64_t, &proposals::by_created_on>>,
       indexed_by<name("expireson"), const_mem_fun<proposals, uint64_t, &proposals::by_expires_on>>
    > proposals_table;
+
+   TABLE votes
+   {
+      name voter;
+      bool is_for;
+      int64_t quantity;
+
+      uint64_t primary_key() const { return voter.value; }
+   };
+   typedef multi_index<name("votes"), votes> votes_table;
 
    struct stats
    {
