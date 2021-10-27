@@ -88,15 +88,47 @@ public:
     */
    ACTION voteagainst(name voter, name proposal);
 
+   /**
+    * Count Votes
+    *
+    * This action count the votes for a proposal.
+    *
+    * @param proposal
+    *
+    * @return no return value.
+    */
+   ACTION countvotes(name proposal);
+
+   /**
+    * Approve
+    *
+    * This action give a final approval for a proposal.
+    *
+    * @param proposal
+    *
+    * @return no return value.
+    */
+   ACTION approve(name proposal);
+
+   /**
+    * Reject
+    *
+    * This action reject a proposal.
+    *
+    * @param proposal
+    *
+    * @return no return value.
+    */
+   ACTION reject(name proposal);
+
    asset get_account_balance(name account);
 
    void payment_handler(name proposal, asset quantity);
 
-   ACTION clear();
+   void save_vote(name voter, name proposal, bool is_for);
 
 private:
    string EOSIO_TOKEN_CONTRACT = "eosio.token";
-
    string SUPPORTED_TOKEN_SYMBOL = "XPR";
    uint8_t SUPPORTED_TOKEN_PRECISION = 4;
 
@@ -127,17 +159,17 @@ private:
 
    TABLE proposals
    {
-      name creator;
-      name receiver;
-      name name;
+      eosio::name name;
+      eosio::name creator;
+      eosio::name receiver;
       string title;
       string detail;
       asset amount;
       string url;
       time_point_sec created_on;
       time_point_sec expires_on;
-      uint8_t votes_for;
-      uint8_t votes_against;
+      int64_t votes_for;
+      int64_t votes_against;
       uint8_t status;
 
       uint64_t primary_key() const { return name.value; }
