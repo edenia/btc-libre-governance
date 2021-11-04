@@ -19,12 +19,12 @@ All proposals are subject to a 10 day voting period, and any address with voting
 |   User Role    |     Action     |                   Description                   |                                 Pre Conditions                                 |           Post Conditions            |
 | :------------: | :------------: | :---------------------------------------------: | :----------------------------------------------------------------------------: | :----------------------------------: |
 |    Proposer    |    `create`    |              Create a new proposal              |                         Account must hold `1000 LIBRE`                         |     Proposal is created as draft     |
-|    Proposer    |   `pay_fee`    |             pay for a new proposal              |                    Account must pay cost of a new proposal                     | Proposal is set as active for voting |
-|     Voter      |   `vote_for`   |           Vote for an active proposal           | proposal must be active , voter must be registered and have a non-zero balance |       Vote for count increases       |
-|     Voter      | `vote_against` |         Vote against an active proposal         | proposal must be active , voter must be registered and have a non-zero balance |     Vote against count increases     |
+|    Proposer    |   `transfer`    |             pay for a new proposal              |                    Account must pay cost of a new proposal                     | Proposal is set as active for voting |
+|     Voter      |   `votefor`   |           Vote for an active proposal           | proposal must be active , voter must be registered and have a non-zero balance |       Vote for count increases       |
+|     Voter      | `voteagainst` |         Vote against an active proposal         | proposal must be active , voter must be registered and have a non-zero balance |     Vote against count increases     |
 |    Approver    |   `approve`    |               Approve a Proposal                |                          Proposal must have succeeded                          |         Proposal is executed         |
 |    Approver    |    `reject`    |                Reject a Proposal                |                          Proposal must have succeeded                          |         Proposal is executed         |
-| Smart Contract | `count_votes`  | Count votes to determine if a proposal succeeds |                   Proposal must have completed voting window                   |  Proposal is approved or cancelled   |
+| Smart Contract | `countvotes`  | Count votes to determine if a proposal succeeds |                   Proposal must have completed voting window                   |  Proposal is approved or cancelled   |
 
 ## Proposals
 
@@ -51,6 +51,7 @@ Proposals are executable code as a funds transfer to the receiver account.
   SUCCEEDED = 3
   DEFEATED = 4
   CANCELED = 5
+  COMPLETED = 6
 ```
 
 ### Proposal Cost
