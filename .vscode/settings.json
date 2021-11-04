@@ -10,4 +10,7 @@
   "[markdown]": {
     "editor.formatOnSave": true
   },
+  "[cpp]": {
+    "editor.formatOnSave": true
+  },
 }
