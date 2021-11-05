@@ -175,6 +175,45 @@ void btclgovernan::countvotes( name proposal )
     } );
 }
 
+void btclgovernan::checkvotes( name proposal )
+{
+    // validate the proposals exist with active status
+    proposals_table _proposals( get_self(), get_self().value );
+    auto            _proposal = _proposals.find( proposal.value );
+    check( _proposal != _proposals.end(), "proposal not found" );
+    check( _proposal->status == proposal_status::ACTIVE, "invalid proposal status" );
+
+    votes_table _votes( get_self(), proposal.value );
+    int64_t     votes_for = 0;
+    int64_t     votes_against = 0;
+
+    // count the votes based on each voter balance
+    for ( auto it = _votes.begin(); it != _votes.end(); it++ )
+    {
+        // get the voter balance
+        asset balance = get_account_balance( it->voter );
+
+        // increase the total votes
+        if ( it->is_for )
+        {
+            votes_for += balance.amount;
+        }
+        else
+        {
+            votes_against += balance.amount;
+        }
+
+        // save the vote
+        _votes.modify( it, get_self(), [&]( auto &ref ) { ref.quantity = balance.amount; } );
+    }
+
+    // save the result
+    _proposals.modify( _proposal, get_self(), [&]( auto &ref ) {
+        ref.votes_for = votes_for;
+        ref.votes_against = votes_against;
+    } );
+}
+
 void btclgovernan::approve( name proposal )
 {
     // get the params data

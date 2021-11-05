@@ -106,6 +106,17 @@ CONTRACT btclgovernan : public contract
     ACTION countvotes( name proposal );
 
     /**
+     * Check Votes
+     *
+     * This action update the voting progress.
+     *
+     * @param proposal
+     *
+     * @return no return value.
+     */
+    ACTION checkvotes( name proposal );
+
+    /**
      * Approve
      *
      * This action give a final approval for a proposal.
