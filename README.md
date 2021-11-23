@@ -1,108 +1,98 @@
-# EOSCR Backend Boilerplate
+## BTC Libre Governance
 
-[![N|Solid](https://github.com/eoscostarica/eos-rate/raw/master/docs/eoscostarica-logo-black.png)](https://eoscostarica.io/)
+The system works as a decentralized voting mechanism set up in the rules governing the blockchain, where budgets for specific projects are proposed and funded once they receive sufficient votes from token holders.
 
-[![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com) ![GitHub](https://img.shields.io/github/license/eoscostarica/backend-boilerplate) ![GitHub repo size](https://img.shields.io/github/repo-size/eoscostarica/backend-boilerplate) ![Twitter Follow](https://img.shields.io/twitter/follow/eoscostarica?style=social) ![GitHub forks](https://img.shields.io/github/forks/eoscostarica/backend-boilerplate?style=social)
+Token holders can create a proposal to be paid in Bitcoin. The cost of creating a proposal is **50,000 SATS** users must also hold a minimum of **1,000 LIBRE** balance in order to submit a proposal.
 
-A highly scalable skeleton with best practices, ideal for backend projects quick start
+Active proposals will be voted on by LIBRE token holders who can vote for or against proposals during a **10 day** voting window. Token holders can vote with a voting wight that corresponds to their balance.
 
-## Version
+All proposals are subject to a 10 day voting period, and any address with voting power can vote for or against the proposal. If a majority, and at least 10% of circulating supply votes are cast for the proposal, it is queued for approval, and can be executed or flagged and canceled.
 
-- 0.1.0
+![Governance Flow](docs/btc-libre-governance.png)
 
-## Features!
+# Contract Data Model
 
-This boilerplate features all the latest tools and practices in the industry
+![Data Model](docs/data-model.png)
 
-- **[hasura](https://hasura.io)**
-  Hasura GraphQL Engine is an opensource service that connects to your databases & microservices and auto-generates a production-ready GraphQL backend
+# Contract Actions
 
-- **[hapi](https://hapi.dev/)**
-  A back end service for custom busines logic integrated with hasura using [actions](https://hasura.io/docs/1.0/graphql/manual/actions/index.html#actions)
+|   User Role    |     Action     |                   Description                   |                                 Pre Conditions                                 |           Post Conditions            |
+| :------------: | :------------: | :---------------------------------------------: | :----------------------------------------------------------------------------: | :----------------------------------: |
+|    Proposer    |    `create`    |              Create a new proposal              |                         Account must hold `1000 LIBRE`                         |     Proposal is created as draft     |
+|    Proposer    |   `transfer`    |             pay for a new proposal              |                    Account must pay cost of a new proposal                     | Proposal is set as active for voting |
+|     Voter      |   `votefor`   |           Vote for an active proposal           | proposal must be active , voter must be registered and have a non-zero balance |       Vote for count increases       |
+|     Voter      | `voteagainst` |         Vote against an active proposal         | proposal must be active , voter must be registered and have a non-zero balance |     Vote against count increases     |
+|    Approver    |   `approve`    |               Approve a Proposal                |                          Proposal must have succeeded                          |         Proposal is executed         |
+|    Approver    |    `reject`    |                Reject a Proposal                |                          Proposal must have succeeded                          |         Proposal is executed         |
+| Smart Contract | `countvotes`  | Count votes to determine if a proposal succeeds |                   Proposal must have completed voting window                   |  Proposal is approved or cancelled   |
 
-- **[docker-compose](https://docs.docker.com/compose/)**
-  Compose is a tool for defining and running multi-container Docker applications
+## Proposals
 
-## File Structure
+Proposals are executable code as a funds transfer to the receiver account.  
 
-Within the download you'll find the following directories and files:
 
-```bash
-eoscrbackendboilerplate/
-├── hasura
-│ ├── migrations
-│ └── config.yaml
-├── hapi
-│ ├── src
-│ | ├── config
-│ | ├── api
-│ | ├── routes
-│ | └── config.yaml
-│ ├── .dockerignore
-│ ├── .eslintrc
-│ ├── .prettierrc
-│ ├── Dockerfile
-│ ├── yarn-lock.json
-│ └── package.json
-├── .env.example
-├── .gitignore
-├── docker-compose.yaml
-├── .LICENSE
-├── .prettierrc
-├── Dockerfile
-├── LICENSE
-└── README.md
+### notes :
+- avoid need for a database 
+- auto generate names for proposals
+
+### Proposal Fields
+
+- Proposer Account
+- Proposal Name
+- Proposal Detail
+- Proposal Amount in Sats
+- Account to be Paid
+
+### Proposal Status
+
+```
+  DRAFT = 1
+  ACTIVE = 2
+  SUCCEEDED = 3
+  DEFEATED = 4
+  CANCELED = 5
+  COMPLETED = 6
 ```
 
-There are some important folders like
+### Proposal Cost
 
-- `hapi/src/api` should have all reusable code for example a code to generate tax invoice
-- `hapi/src/routes` this folder should only have the endpoint mapping and params validations and use functions from api folder to handle the business logic
+In order to prevent spam and ensure only serious proposals make it to this stage. a registration fee of **50,000** sats must be paid for any proposal to be created. The funds obtained from proposal costs will be deposited to the `funding` account where funds will be distributed from for all proposals.
 
-## Installation
+A transfer needs to include the proposal name in the memo field for the system to pick up the payment and set a proposal from draft to active.
 
-Basic knowledge about Docker, Docker Compose and NodeJS is required.
+### notes :
 
-### Before to start
+- This would be done with smart contract notify?
+- How would we handle transfers with invalid memo fields? reject transfers similar to evodex.
+- Consolidate draft and payment actions in order to simplify user experience.
 
-Somethings you need before getting started:
+## Voting
 
-- [git](https://git-scm.com/)
-- [node.js](https://nodejs.org/es/)
-- [Hasura CLI](https://hasura.io/docs/1.0/graphql/manual/hasura-cli/install-hasura-cli.html#install-hasura-cli)
+BTC Libre is managed by a decentralized community of LIBRE token holders who propose and vote on projects for the network.
 
-### First time
+### Voting period
 
-1.  Clone this repo using `git clone --depth=1 https://github.com/eoscostarica/backend-boilerplate.git <YOUR_PROJECT_NAME>`
-2.  Move to the appropriate directory: `cd <YOUR_PROJECT_NAME>`.
-3.  Copy the `.env.example` then update the environment variables according to your needs
+All proposals are subject to a 10 day voting period, and any address with voting power can vote for or against the proposal. If a majority, and at least 10% of circulating supply votes are cast for the proposal, it is queued for approval, and can be executed or flagged and canceled.
 
-### Quick start
+### Voting Threshold
 
-At this point you can run `make run`, you can check the services runing on:
+10% of the circulating supply must vote in order for a proposal to be eligible for acceptance. If more than 50% of token s vote in favor the proposal succeeds.
 
-- hapi at http://localhost:9090
-- hasura at http://localhost:9695
+## Proposal Approval
 
-## License
+For vote counts account balances must be read from the last known balance of accounts when the voting window is over. This in order to prevent users from voting , then transferring funds and voting again.
 
-MIT © [EOS Costa Rica](https://eoscostarica.io)
+### Proposal Execution
 
-## Contributing
+### Proposal Cancellation
 
-Please Read EOS Costa Rica's [Open Source Contributing Guidelines](https://developers.eoscostarica.io/docs/open-source-guidelines).
+# Deliverables
 
-Please report bugs big and small by [opening an issue](https://github.com/eoscostarica/backend-boilerplate/issues)
+- Design 1 weeks (already in progress)
+- Development 2 weeks min
+- Smart Contract Testing 1 week
+- UI integration 2 weeks
 
-## About EOS Costa Rica
+5 weeks total development (ROM +/- 20%)
 
-<p align="center">
-	<a href="https://eoscostarica.io">
-		<img src="https://github.com/eoscostarica/eos-rate/raw/master/docs/eoscostarica-logo-black.png" width="300">
-	</a>
-</p>
-<br/>
-
-EOS Costa Rica is an independently-owned, self-funded, bare-metal Genesis block producer that provides stable and secure infrastructure for EOSIO blockchains. We support open source software for our community while offering enterprise solutions and custom smart contract development for our clients.
-
-[eoscostarica.io](https://eoscostarica.io) Support OpenSource!
+4-6 weeks
