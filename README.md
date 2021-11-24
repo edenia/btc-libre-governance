@@ -86,13 +86,3 @@ For vote counts account balances must be read from the last known balance of acc
 
 ### Proposal Cancellation
 
-# Deliverables
-
-- Design 1 weeks (already in progress)
-- Development 2 weeks min
-- Smart Contract Testing 1 week
-- UI integration 2 weeks
-
-5 weeks total development (ROM +/- 20%)
-
-4-6 weeks
