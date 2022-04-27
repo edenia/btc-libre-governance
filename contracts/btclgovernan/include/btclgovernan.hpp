@@ -146,7 +146,7 @@ CONTRACT btclgovernan : public contract
 
   private:
     const name   EOSIO_TOKEN_CONTRACT = name( "eosio.token" );
-    const symbol SUPPORTED_TOKEN_SYMBOL = symbol( "XPR", 4 );
+    const symbol SUPPORTED_TOKEN_SYMBOL = symbol( "LIBRE", 0 );
     const string PAYMENT_TRANSFER = "payment:";
     const string DONATION_TRANSFER = "donation";
     const string FOUNDING_TRANSFER = "founding";
