@@ -138,7 +138,7 @@ CONTRACT btclgovernan : public contract
      */
     ACTION reject( name proposal );
 
-    asset get_account_balance( name account );
+    asset get_account_balance( name account, symbol sym );
 
     void payment_handler( name proposal, asset quantity );
 
@@ -146,7 +146,8 @@ CONTRACT btclgovernan : public contract
 
   private:
     const name   EOSIO_TOKEN_CONTRACT = name( "eosio.token" );
-    const symbol SUPPORTED_TOKEN_SYMBOL = symbol( "LIBRE", 0 );
+    const symbol SUPPORTED_VOTE_TOKEN_SYMBOL = symbol( "LIBRE", 0 );
+    const symbol SUPPORTED_PAY_TOKEN_SYMBOL = symbol( "BTCL", 8 );
     const string PAYMENT_TRANSFER = "payment:";
     const string DONATION_TRANSFER = "donation";
     const string FOUNDING_TRANSFER = "founding";

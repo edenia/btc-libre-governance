@@ -21,9 +21,9 @@ ACTION btclgovernan::setparams( name    funding_account,
 {
     require_auth( get_self() );
 
-    check( minimum_balance_to_create_proposals.symbol.code() == SUPPORTED_TOKEN_SYMBOL.code(),
+    check( minimum_balance_to_create_proposals.symbol.code() == SUPPORTED_VOTE_TOKEN_SYMBOL.code(),
            "invalid minimum_balance_to_create_proposals symbol" );
-    check( proposal_cost.symbol.code() == SUPPORTED_TOKEN_SYMBOL.code(), "invalid proposal_cost symbol" );
+    check( proposal_cost.symbol.code() == SUPPORTED_PAY_TOKEN_SYMBOL.code(), "invalid proposal_cost symbol" );
 
     params_table _params( get_self(), get_self().value );
 
@@ -49,7 +49,7 @@ ACTION btclgovernan::create( name   creator,
     require_auth( creator );
 
     // validate the token code
-    check( amount.symbol.code() == SUPPORTED_TOKEN_SYMBOL.code(), "invalid amount symbol" );
+    check( amount.symbol.code() == SUPPORTED_PAY_TOKEN_SYMBOL.code(), "invalid amount symbol" );
 
     // validate that there is no proposal with the same name
     proposals_table _proposals( get_self(), get_self().value );
@@ -61,7 +61,7 @@ ACTION btclgovernan::create( name   creator,
     auto         params_data = _params.get_or_create( get_self() );
 
     // validate the minimum balance of the creator account
-    asset balance = get_account_balance( creator );
+    asset balance = get_account_balance( creator, SUPPORTED_VOTE_TOKEN_SYMBOL );
     check( balance.amount >= params_data.minimum_balance_to_create_proposals.amount, "not enough balance" );
 
     // save the proposal as a draft
@@ -141,7 +141,7 @@ void btclgovernan::countvotes( name proposal )
     for ( auto it = _votes.begin(); it != _votes.end(); it++ )
     {
         // get the voter balance
-        asset balance = get_account_balance( it->voter );
+        asset balance = get_account_balance( it->voter, SUPPORTED_VOTE_TOKEN_SYMBOL );
 
         // increase the total votes
         if ( it->is_for )
@@ -158,7 +158,7 @@ void btclgovernan::countvotes( name proposal )
     }
 
     // get the current supply
-    stats_table _stats( EOSIO_TOKEN_CONTRACT, SUPPORTED_TOKEN_SYMBOL.code().raw() );
+    stats_table _stats( EOSIO_TOKEN_CONTRACT, SUPPORTED_VOTE_TOKEN_SYMBOL.code().raw() );
     auto        _stat = _stats.begin();
     check( _stat != _stats.end(), "unable to read current supply" );
 
@@ -191,7 +191,7 @@ void btclgovernan::checkvotes( name proposal )
     for ( auto it = _votes.begin(); it != _votes.end(); it++ )
     {
         // get the voter balance
-        asset balance = get_account_balance( it->voter );
+        asset balance = get_account_balance( it->voter, SUPPORTED_VOTE_TOKEN_SYMBOL );
 
         // increase the total votes
         if ( it->is_for )
@@ -263,14 +263,14 @@ void btclgovernan::reject( name proposal )
 
 // helper functions
 
-asset btclgovernan::get_account_balance( name account )
+asset btclgovernan::get_account_balance( name account, symbol sym )
 {
     account_table _accounts( EOSIO_TOKEN_CONTRACT, account.value );
-    asset         result = asset( 0, SUPPORTED_TOKEN_SYMBOL );
+    asset         result = asset( 0, sym );
 
     for ( auto it = _accounts.begin(); it != _accounts.end(); it++ )
     {
-        if ( it->balance.symbol.code() == SUPPORTED_TOKEN_SYMBOL.code() && it->balance.amount > 0 )
+        if ( it->balance.symbol.code() == sym.code() && it->balance.amount > 0 )
         {
             result = it->balance;
             break;
@@ -282,6 +282,9 @@ asset btclgovernan::get_account_balance( name account )
 
 void btclgovernan::payment_handler( name proposal, asset quantity )
 {
+    // validate the contact account
+    check( EOSIO_TOKEN_CONTRACT == get_first_receiver(), "invalid contract" );
+
     // validate the proposals exist with draft status
     proposals_table _proposals( get_self(), get_self().value );
     auto            _proposal = _proposals.find( proposal.value );
@@ -293,7 +296,7 @@ void btclgovernan::payment_handler( name proposal, asset quantity )
     auto         params_data = _params.get_or_create( get_self() );
 
     // validate the quantity
-    check( params_data.proposal_cost.symbol.code() == SUPPORTED_TOKEN_SYMBOL.code(), "invalid quantity symbol" );
+    check( quantity.symbol.code() == SUPPORTED_PAY_TOKEN_SYMBOL.code(), "invalid quantity symbol" );
     check( quantity.amount == params_data.proposal_cost.amount, "invalid quantity amount" );
 
     // change the proposal status to start the voting process
@@ -306,7 +309,7 @@ void btclgovernan::payment_handler( name proposal, asset quantity )
 void btclgovernan::save_vote( name voter, name proposal, bool is_for )
 {
     // validate the minimum balance of the voter account
-    asset balance = get_account_balance( voter );
+    asset balance = get_account_balance( voter, SUPPORTED_VOTE_TOKEN_SYMBOL );
     check( balance.amount > 0, "not enough balance" );
 
     // validate the proposals exist with active status
