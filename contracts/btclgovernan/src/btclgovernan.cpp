@@ -49,7 +49,7 @@ ACTION btclgovernan::create( name   creator,
     require_auth( creator );
 
     // validate the token code
-    check( amount.symbol.code() == SUPPORTED_PAY_TOKEN_SYMBOL.code(), "invalid amount symbol" );
+    check( amount.symbol.code() == SUPPORTED_VOTE_TOKEN_SYMBOL.code(), "invalid amount symbol" );
 
     // validate that there is no proposal with the same name
     proposals_table _proposals( get_self(), get_self().value );
